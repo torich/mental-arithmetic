@@ -1,0 +1,138 @@
+body {
+    background: #e8f5f9;
+}
+input, select {
+        border: 1px solid #f6e5e5;
+}
+input[type=button] {
+    background: #a7c5ce;
+    color: white;
+}
+#root {
+    margin: 0 auto;
+    max-width: 960px;
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.answer-container,
+.calulator-container,
+.create-container {
+    display: flex;
+    flex-flow: nowrap row;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+.calulator-container > *,
+.create-container > *,
+.answer-container > * {
+    font-size: 40px;
+    width: 100%;
+    text-align: right;
+}
+.create-container > *{
+    max-width: 113px;
+    margin-bottom: 30px;
+}
+.input-container .status-button ,
+.input-container .number-button {
+    margin-top: 20px;
+    display: flex;
+    flex-flow: wrap row;
+    gap: 5%;
+    justify-content: center;
+    align-items: center;
+}
+.status-button > input[type=button],
+.number-button > input[type=button] {
+    flex-basis: 30%;
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+.calulator-container,
+.answer-container {
+    margin-bottom: 50px;
+    width: 100%;
+}
+#num-0 {
+    order: 9;
+}
+.opentab-container input[type=radio] {
+    display: none;
+}
+.opentab-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    gap: 10px;
+}
+.opentab-container > * {
+    flex: 1 0 50%;
+    font-size: 24px;
+    height: 50px;
+    text-align: center;
+    vertical-align: middle;
+    background: lightblue;
+    color: #666;
+    border-radius: 4px;
+}
+.tab-item {
+    line-height: 50px;
+    width: 100%;
+    height: 100%;
+    display: inline-block;
+}
+.opentab-container > *:has(input[type=radio]:checked) {
+    background: #71b6cc;
+    color: white;
+}
+
+/** answer */
+.calulator-container {
+    position: relative;
+}
+.calulator-container > input[type=text] {
+    display: inline;
+    width: 40px;
+    background: transparent;
+    border: none;
+}
+.calulator-container::before {
+    content: "";
+    color: white;
+    display: inline-block;
+    width: 25%;
+    height: 80%;
+    position: absolute;
+    letter-spacing: 8px;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 16px;
+    line-height: 2.4;
+    top: 0;
+    left: 50%;
+    border-radius: 10px;
+    transform: translate(-50%, 0%);
+    opacity:0;
+    transition: opacity 1s, transform 1s;
+    font-weight: bold;
+}
+.calulator-container.answer-checked::before {
+    transform: translate(-50%, -120%);
+    opacity: 1;
+    transition: opacity 1s, transform 1s;
+
+}
+.calulator-container.answer-checked.true::before {
+    content: "TRUE";
+    background:rgb(227,187,43);
+}
+.calulator-container.answer-checked.false::before {
+    content: "FALSE";
+    background:rgb(166 178 186);
+}

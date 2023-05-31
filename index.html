@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="jp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <meta name="robots" content="noindex">
+    <link rel="stylesheet" href="./css/styles.css">
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js" crossorigin></script>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        (() => {
+            const question  = [
+                // { id: 0, numbers: [1,3,4,5], operand: 0, isDone: false, isCorrected: false },
+                // { id: 1, numbers: [4,5,2,3], operand: 0, isDone: false, isCorrected: false  },
+                // { id: 2, numbers: [6,8,9,7], operand: 0, isDone: false, isCorrected: false  },
+            ]
+            window.onload = () => {
+                let focus = document.getElementById('c-1');
+                focus.focus();
+            };
+            const container = document.getElementById('root');
+            const root = ReactDOM.createRoot(container);
+            function CalulatorContainer(props) {
+                return (
+                    <div id="calulatorContainer" className="calulator-container">
+                        <input type="text" placeholder="0" readOnly value={props.curQuestion.num[0]} />
+                        <input type="text" placeholder="0" readOnly value={props.curQuestion.num[1]} />
+                        <input type="text" value="✕" readOnly />
+                        <input type="text" placeholder="0" readOnly value={props.curQuestion.num[2]} />
+                        <input type="text" placeholder="0" readOnly value={props.curQuestion.num[3]} />
+                    </div>
+                );
+            }
+            function CreateContainer(props) {
+                return (
+                    <div className="create-container">
+                        <input id="c-1" type="text" readOnly placeholder="0" value={props.localInput.num[0]} />
+                        <input id="c-2" type="text" readOnly placeholder="0" value={props.localInput.num[1]} />
+                        <select defaultValue={props.localInput.operand}>
+                            <option value="0">✕</option>
+                            <option value="1">＋</option>
+                            <option value="2">÷</option>
+                            <option value="3">－</option>
+                        </select>
+                        <input id="c-3" type="text" readOnly placeholder="0" value={props.localInput.num[2]} />
+                        <input id="c-4" type="text" readOnly placeholder="0" value={props.localInput.num[3]} />
+                    </div>
+                );
+            }
+            function AnswerContainer(props) {
+                let str = ''.concat(props.localInput.num[0]).concat(props.localInput.num[1]).concat(props.localInput.num[2]).concat(props.localInput.num[3]);
+                str = str.substring(0, props.localInput.pos);
+                return (
+                    <div className="answer-container">
+                        ANSWER:<input id="answer" type="text" placeholder="0" readOnly value={str} />
+                    </div>
+                );
+            }
+            function ArithmeticContainer(props) {
+                return (
+                    <div className="arithmetic-container">
+                        <CalulatorContainer curQuestion={props.curQuestion} />
+                        { props.opentab === tabvalue[0]
+                            ? <CreateContainer localInput={props.localInput} /> 
+                            : <AnswerContainer localInput={props.localInput}/> }
+                    </div>
+                );
+            }
+            function OpentabContainer(props) {
+                const tabarray = tabvalue.map((val, i) => {
+                    return (
+                        <div
+                            key={i}
+                            id={'tabcontainer-'.concat(val)}>
+                            <input 
+                                type="radio" 
+                                name="opentab"
+                                id={'opentab-'.concat(val)}
+                                checked={props.opentab === val}
+                                onChange={(e) => props.changeTab(val)} />
+                            <label
+                                className="tab-item"
+                                htmlFor={'opentab-'.concat(val)}>
+                                {val}
+                            </label>
+                        </div>
+                    );
+                });
+                return (
+                    <div className="opentab-container">
+                        {tabarray}
+                    </div>
+                );
+            }
+            function NumberButton(props) {
+                const btns = [...Array(10)].map((_, i) => i).map((val, key) => {
+                    return (
+                        <input
+                            key={key}
+                            className="numBtn"
+                            type="button"
+                            id={"num-".concat(val)}
+                            value={val}
+                            onClick={(e) => {props.inputNumBtn(e.target.value)}} />
+                    );
+                });
+                return (
+                    <div className="number-button">
+                        {btns}
+                    </div>
+                );
+            }
+            function StatusButton(props) {
+                return (
+                    <div className="status-button">
+                        <input type="button" className="stateBtn" value="＜" />
+                        <input type="button" className="stateBtn" value="＞" />
+                        <input type="button" className="stateBtn" onClick={(e) => {props.clickEnterBtn(e)}} value="Enter" />
+                        <input type="button" className="stateBtn" value="1char Clear" />
+                        <input type="button" className="stateBtn" onClick={(e) => {props.clickAllClearBtn(e)}}value="All Clear" />
+                    </div>
+                );
+            }
+            function InputContainer(props) {
+                return (
+                    <div className="input-container">
+                        <NumberButton
+                            localInput={props.localInput}
+                            inputNumBtn={props.inputNumBtn}
+                        />
+                        <StatusButton
+                            localInput={props.localInput}
+                            clickEnterBtn={props.clickEnterBtn}
+                            clickAllClearBtn={props.clickAllClearBtn}
+                        />
+                    </div>
+                );
+            }
+            const tabvalue = ['create', 'answer'];
+            const default_question = {
+                            num: [ 0, 0, 0, 0],
+                            operand: 0,
+                            isDone: false,
+                            isCorrected: false,
+                            correct: null
+                        };
+            const default_local = {
+                            num: [ 0, 0, 0, 0 ],
+                            pos: 0,
+                            operand: 0
+                        };
+            function copyObjects(target) {
+                return Object.assign({}, JSON.parse(JSON.stringify(target)));
+            }
+            class App extends React.Component {
+                constructor() {
+                    super();
+                    this.state = {
+                        opentab: tabvalue[0],
+                        localInput: copyObjects(default_local),
+                        previousIsCorrected: false,
+                        curQuestion: copyObjects(default_question),
+                        done: [],
+                    }
+                    this.changeTab = this.changeTab.bind(this);
+                    this.inputNumBtn = this.inputNumBtn.bind(this);
+                    this.clickEnterBtn = this.clickEnterBtn.bind(this);
+                    this.clickAllClearBtn = this.clickAllClearBtn.bind(this);
+                }
+                clickAllClearBtn(e){
+                    this.setState({
+                        localInput: {
+                            num: [0,0,0,0],
+                            pos: 0,
+                        },
+                    })
+                } 
+                clickEnterBtn(e){
+                    if (this.state.opentab === tabvalue[0]) {
+                        if (this.state.localInput.pos !== 4) {
+                            return;
+                        }
+                        let num = Array.from(this.state.localInput.num);
+                        let correct = (num[0] * 10 + num[1] ) * (num[2] * 10 + num[3] );
+                        console.log("corect:" + correct);
+                        let curQuestion = {
+                            num: this.state.localInput.num,
+                            operand: this.state.localInput.operand,
+                            isDone: false,
+                            isCorrected: false,
+                            correct: correct
+                        }
+                        this.setState({
+                            curQuestion: curQuestion,
+                            localInput: copyObjects(default_local)
+                        });
+                        console.log(curQuestion);
+                        this.changeTab('answer');
+                    } else if (this.state.opentab === tabvalue[1]) {
+                        let posIndex = this.state.localInput.pos;
+                        let judge = this.state.curQuestion.correct === parseInt(this.state.localInput.num.join('').substring(0, posIndex));
+                        let arr = this.state.done;
+                        let curQuestion = this.state.curQuestion;
+                        curQuestion.isDone = true;
+                        curQuestion.isCorrected = judge;
+                        arr.push(curQuestion);
+                        this.setState({
+                            previousIsCorrecte: judge,
+                            curQuestion: copyObjects(default_question),
+                            localInput: copyObjects(default_local),
+                            done: arr,
+                        });
+                        let calulatorContainer = document.getElementById('calulatorContainer');
+                        calulatorContainer.classList.add('answer-checked');
+                        calulatorContainer.classList.add(judge);
+                        setTimeout(() => {
+                            calulatorContainer.classList.remove('answer-checked');
+                            calulatorContainer.classList.add(judge);
+                            clearTimeout(this);
+                        }, 2000);
+                    }
+                }
+                inputNumBtn(val){
+                    let arr = Array.from(this.state.localInput.num);
+                    arr[this.state.localInput.pos] = parseInt(val);
+                    let newpos = this.state.localInput.pos + 1;
+                    this.setState({
+                        localInput: {
+                            num: arr,
+                            pos: newpos
+                        }
+                    });
+                    // console.log([this.state.localInput.pos, this.state.localInput.num]);
+                }
+                changeTab(tabvalueString) {
+                    this.setState({
+                        opentab : (tabvalue.filter((val) => { return val === tabvalueString })).toString(),
+                    });
+                }
+                render() {
+                    return (
+                        <div className="container">
+                            <ArithmeticContainer
+                                opentab={this.state.opentab}
+                                localInput={this.state.localInput}
+                                curQuestion={this.state.curQuestion} />
+                            <OpentabContainer
+                                opentab={this.state.opentab}
+                                changeTab={this.changeTab} />
+                            <InputContainer
+                                opentab={this.state.opentab}
+                                localInput={this.state.localInput}
+                                inputNumBtn={this.inputNumBtn}
+                                clickEnterBtn={this.clickEnterBtn} 
+                                clickAllClearBtn={this.clickAllClearBtn} />
+                        </div>
+                    );
+                };
+            }
+             
+            root.render(<App />);
+        })();
+    </script>
+</body>
+</html>
