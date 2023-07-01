@@ -8,17 +8,26 @@ input[type=button] {
     background: #a7c5ce;
     color: white;
 }
-#root {
+.wrapper {
     margin: 0 auto;
     max-width: 960px;
     height: 100vh;
     width: 100%;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: stretch;
+}
+.container {
+    width: 530px;
+    display: flex;
+    flex-flow: nowrap column;
+    justify-content: center;
+}
+.sidebar {
+    width: 300px;
 }
 .answer-container,
-.calulator-container,
+.culculator-container,
 .create-container {
     display: flex;
     flex-flow: nowrap row;
@@ -27,7 +36,7 @@ input[type=button] {
     align-items: center;
     width: 100%;
 }
-.calulator-container > *,
+.culculator-container > *,
 .create-container > *,
 .answer-container > * {
     font-size: 40px;
@@ -53,7 +62,7 @@ input[type=button] {
     font-size: 24px;
     margin-bottom: 10px;
 }
-.calulator-container,
+.culculator-container,
 .answer-container {
     margin-bottom: 50px;
     width: 100%;
@@ -72,7 +81,7 @@ input[type=button] {
     gap: 10px;
 }
 .opentab-container > * {
-    flex: 1 0 50%;
+    flex: 1 1 50%;
     font-size: 24px;
     height: 50px;
     text-align: center;
@@ -93,16 +102,16 @@ input[type=button] {
 }
 
 /** answer */
-.calulator-container {
+.culculator-container {
     position: relative;
 }
-.calulator-container > input[type=text] {
+.culculator-container > input[type=text] {
     display: inline;
     width: 40px;
     background: transparent;
     border: none;
 }
-.calulator-container::before {
+.culculator-container::before {
     content: "";
     color: white;
     display: inline-block;
@@ -122,17 +131,88 @@ input[type=button] {
     transition: opacity 1s, transform 1s;
     font-weight: bold;
 }
-.calulator-container.answer-checked::before {
+.culculator-container.answer-checked::before {
     transform: translate(-50%, -120%);
     opacity: 1;
     transition: opacity 1s, transform 1s;
 
 }
-.calulator-container.answer-checked.true::before {
+.culculator-container.answer-checked.true::before {
     content: "TRUE";
     background:rgb(227,187,43);
 }
-.calulator-container.answer-checked.false::before {
+.culculator-container.answer-checked.false::before {
     content: "FALSE";
     background:rgb(166 178 186);
+}
+.answer-wrapper {
+    position: relative;
+}
+
+.timer-container {
+    position: absolute;
+    top: -150%;
+    left: 0;
+    width: 60px;
+    height: 60px;
+    line-height: 60px;
+    background-color: brown;
+    color: white;
+    font-weight: 600;
+    font-size: 20px;
+    text-align: center;
+    border-radius: 30px;
+    animation:  linear .5s infinite alternate timer;
+}
+@keyframes timer {
+    0% {
+        transform: translateY(0%);
+    }
+    75% {
+        transform: translateY(0%);
+    }
+    100% {
+        transform: translateY(10%);
+    }
+}
+@media screen and (min-width: 769px) {
+    .sidebar-btn {
+        display: none;
+    }
+}
+@media screen and (max-width: 768px) {
+    .wrapper {
+        flex-flow: nowrap column;
+        position: relative;
+    }
+    .container {
+        width: 100%;
+    }
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 100%;
+        width: 100vw;
+        height:100vh;
+        color: white;
+        background: #272f5eee;
+        transition: left 1s ease ;
+    }
+    .sidebar-btn {
+        content: "";
+        width: 50px;
+        height: 50px;
+        line-height: 50px;
+        font-size: 16px;
+        background: brown;
+        color: white;
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        border-radius: 30px;
+        text-align: center;
+    }
+    .sidebar.open {
+        left: 0;
+    }
 }

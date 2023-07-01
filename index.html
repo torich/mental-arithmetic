@@ -25,14 +25,34 @@
             };
             const container = document.getElementById('root');
             const root = ReactDOM.createRoot(container);
-            function CalulatorContainer(props) {
+            function DoneList(props) {
+                const doneList = props.doneList.map((val, i) => {
+                    return (
+                        <li
+                            key={i}
+                            id={'donelist-'.concat(i)}>
+                            {val.num[0] * 10 + val.num[1]}×{val.num[2] * 10 + val.num[3]}
+                            <span>  {val.isCorrected?"true":"false"}</span>
+                            <span>  {val.timer}</span>
+                        </li>
+                    );
+                });
                 return (
-                    <div id="calulatorContainer" className="calulator-container">
-                        <input type="text" placeholder="0" readOnly value={props.curQuestion.num[0]} />
-                        <input type="text" placeholder="0" readOnly value={props.curQuestion.num[1]} />
-                        <input type="text" value="✕" readOnly />
-                        <input type="text" placeholder="0" readOnly value={props.curQuestion.num[2]} />
-                        <input type="text" placeholder="0" readOnly value={props.curQuestion.num[3]} />
+                    <ol >
+                        {doneList}
+                    </ol>
+                );
+            }
+            function CalculatorContainer(props) {
+                return (
+                    <div>
+                        <div id="calculatorContainer" className="culculator-container">
+                            <input type="text" placeholder="0" readOnly value={props.curQuestion.num[0]} />
+                            <input type="text" placeholder="0" readOnly value={props.curQuestion.num[1]} />
+                            <input type="text" value="✕" readOnly />
+                            <input type="text" placeholder="0" readOnly value={props.curQuestion.num[2]} />
+                            <input type="text" placeholder="0" readOnly value={props.curQuestion.num[3]} />
+                        </div>
                     </div>
                 );
             }
@@ -56,18 +76,25 @@
                 let str = ''.concat(props.localInput.num[0]).concat(props.localInput.num[1]).concat(props.localInput.num[2]).concat(props.localInput.num[3]);
                 str = str.substring(0, props.localInput.pos);
                 return (
-                    <div className="answer-container">
-                        ANSWER:<input id="answer" type="text" placeholder="0" readOnly value={str} />
+                    <div className="answer-wrapper">
+                        <div className="answer-container">
+                            ANSWER:<input id="answer" type="text" placeholder="0" readOnly value={str} />
+                        </div>
+                        <div id="timerContainer" className="timer-container">
+                            {props.timer}
+                        </div>
                     </div>
                 );
             }
             function ArithmeticContainer(props) {
                 return (
                     <div className="arithmetic-container">
-                        <CalulatorContainer curQuestion={props.curQuestion} />
+                        <CalculatorContainer curQuestion={props.curQuestion} />
                         { props.opentab === tabvalue[0]
                             ? <CreateContainer localInput={props.localInput} /> 
-                            : <AnswerContainer localInput={props.localInput}/> }
+                            : <AnswerContainer 
+                                localInput={props.localInput}
+                                timer={props.timer} /> }
                     </div>
                 );
             }
@@ -126,6 +153,11 @@
                     </div>
                 );
             }
+            function SideBarBtn(props) {
+                return (
+                    <span className="sidebar-btn" onClick={(e) => {props.clickSideBtn(e)}}>{props.doneList.length}</span>
+                );
+            }
             function InputContainer(props) {
                 return (
                     <div className="input-container">
@@ -147,13 +179,16 @@
                             operand: 0,
                             isDone: false,
                             isCorrected: false,
-                            correct: null
+                            correct: null,
+                            timer: 0,
                         };
             const default_local = {
                             num: [ 0, 0, 0, 0 ],
                             pos: 0,
                             operand: 0
                         };
+            let startTime = null;
+            let timerFunction = null;
             function copyObjects(target) {
                 return Object.assign({}, JSON.parse(JSON.stringify(target)));
             }
@@ -166,11 +201,32 @@
                         previousIsCorrected: false,
                         curQuestion: copyObjects(default_question),
                         done: [],
+                        timer: 0,
                     }
                     this.changeTab = this.changeTab.bind(this);
                     this.inputNumBtn = this.inputNumBtn.bind(this);
                     this.clickEnterBtn = this.clickEnterBtn.bind(this);
                     this.clickAllClearBtn = this.clickAllClearBtn.bind(this);
+                    this.timerStart = this.timerStart.bind(this);
+                    this.timerClear = this.timerClear.bind(this);
+                    this.clickSideBtn = this.clickSideBtn.bind(this);
+                }
+                timerStart() {
+                    timerFunction = setTimeout(() => {
+                        // console.log(Math.ceil((startTime - Date.now()) / 1000));
+                        this.setState({
+                            timer: Math.abs(Math.ceil((startTime - Date.now()) / 1000))
+                        });
+                        this.timerStart();
+                    }, 1000);
+                }
+                timerClear() {
+                    this.setState({
+                        timer: 0
+                    });
+                    if (timerFunction != null) {
+                        clearTimeout(timerFunction);
+                    } 
                 }
                 clickAllClearBtn(e){
                     this.setState({
@@ -180,6 +236,14 @@
                         },
                     })
                 } 
+                clickSideBtn(e) {
+                    const sidebar = e.target.parentElement;
+                    if (sidebar.classList.contains('open')) {
+                        sidebar.classList.remove('open');
+                    } else {
+                        sidebar.classList.add('open');
+                    }
+                }
                 clickEnterBtn(e){
                     if (this.state.opentab === tabvalue[0]) {
                         if (this.state.localInput.pos !== 4) {
@@ -187,19 +251,20 @@
                         }
                         let num = Array.from(this.state.localInput.num);
                         let correct = (num[0] * 10 + num[1] ) * (num[2] * 10 + num[3] );
-                        console.log("corect:" + correct);
+                        // console.log("corect:" + correct);
                         let curQuestion = {
                             num: this.state.localInput.num,
                             operand: this.state.localInput.operand,
                             isDone: false,
                             isCorrected: false,
-                            correct: correct
+                            correct: correct,
+                            timer: 0,
                         }
                         this.setState({
                             curQuestion: curQuestion,
                             localInput: copyObjects(default_local)
                         });
-                        console.log(curQuestion);
+                        // console.log(curQuestion);
                         this.changeTab('answer');
                     } else if (this.state.opentab === tabvalue[1]) {
                         let posIndex = this.state.localInput.pos;
@@ -208,6 +273,7 @@
                         let curQuestion = this.state.curQuestion;
                         curQuestion.isDone = true;
                         curQuestion.isCorrected = judge;
+                        curQuestion.timer = this.state.timer;
                         arr.push(curQuestion);
                         this.setState({
                             previousIsCorrecte: judge,
@@ -215,12 +281,13 @@
                             localInput: copyObjects(default_local),
                             done: arr,
                         });
-                        let calulatorContainer = document.getElementById('calulatorContainer');
-                        calulatorContainer.classList.add('answer-checked');
-                        calulatorContainer.classList.add(judge);
+                        let calculatorContainer = document.getElementById('calculatorContainer');
+                        calculatorContainer.classList.add('answer-checked');
+                        calculatorContainer.classList.add(judge);
+                        this.changeTab('create');
                         setTimeout(() => {
-                            calulatorContainer.classList.remove('answer-checked');
-                            calulatorContainer.classList.add(judge);
+                            calculatorContainer.classList.remove('answer-checked');
+                            calculatorContainer.classList.remove(judge);
                             clearTimeout(this);
                         }, 2000);
                     }
@@ -241,23 +308,41 @@
                     this.setState({
                         opentab : (tabvalue.filter((val) => { return val === tabvalueString })).toString(),
                     });
+                    if (tabvalueString===tabvalue[1]){
+                        startTime = Date.now();
+                        this.timerStart();
+                    } else {
+                        this.timerClear();
+                    }
                 }
                 render() {
                     return (
-                        <div className="container">
-                            <ArithmeticContainer
-                                opentab={this.state.opentab}
-                                localInput={this.state.localInput}
-                                curQuestion={this.state.curQuestion} />
-                            <OpentabContainer
-                                opentab={this.state.opentab}
-                                changeTab={this.changeTab} />
-                            <InputContainer
-                                opentab={this.state.opentab}
-                                localInput={this.state.localInput}
-                                inputNumBtn={this.inputNumBtn}
-                                clickEnterBtn={this.clickEnterBtn} 
-                                clickAllClearBtn={this.clickAllClearBtn} />
+                        <div className="wrapper">
+                            <div className="container">
+                                <ArithmeticContainer
+                                    opentab={this.state.opentab}
+                                    localInput={this.state.localInput}
+                                    curQuestion={this.state.curQuestion}
+                                    timer={this.state.timer} />
+                                <OpentabContainer
+                                    opentab={this.state.opentab}
+                                    changeTab={this.changeTab} />
+                                <InputContainer
+                                    opentab={this.state.opentab}
+                                    localInput={this.state.localInput}
+                                    inputNumBtn={this.inputNumBtn}
+                                    clickEnterBtn={this.clickEnterBtn} 
+                                    clickAllClearBtn={this.clickAllClearBtn} />
+                            </div>
+                            <div className="sidebar">
+                                <SideBarBtn 
+                                    clickSideBtn={this.clickSideBtn}
+                                    doneList={this.state.done}
+                                     />
+                                <DoneList 
+                                    doneList={this.state.done}
+                                />
+                            </div>
                         </div>
                     );
                 };
